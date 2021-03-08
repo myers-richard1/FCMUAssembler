@@ -1,0 +1,8 @@
+ld a, 255
+ld hl, 0
+ld b, 64
+loopBegin:
+ld [hli], a
+dec b
+jp nz, loopBegin
+halt
