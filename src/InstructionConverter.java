@@ -1,14 +1,20 @@
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Locale;
+import java.util.*;
 
 public class InstructionConverter {
+    public static ArrayList<String> standardMath =
+            new ArrayList<String>(Arrays.asList("add", "adc", "sub", "sbc", "cmp", "and",
+                    "or", "xor", "inc", "dec"));
+    public static ArrayList<String> stragglers = new ArrayList<String>(Arrays.asList("ei", "di", "halt", "swap", "cpl", "bcd"));
+    public static ArrayList<String> flowControl = new ArrayList<String>(Arrays.asList("jp", "call", "ret"));
     public static ArrayList<String> gpRegsAndHLPointer =
             new ArrayList<String>(Arrays.asList("a", "b", "c", "d", "e", "h", "l", "[hl]"));
     public static ArrayList<String> comboRegs = new ArrayList<String>(Arrays.asList("bc", "de", "hl"));
     public static ArrayList<String> weirdPointers = new ArrayList<String>(Arrays.asList("[bc]","[de]","[hli]","[hld]"));
     public static ArrayList<String> flags = new ArrayList<String>(Arrays.asList("z","c","nz","nc"));
+
+    public static int index;
+    public static HashMap<String, Integer> labelMap = new HashMap<String, Integer>();
 
     public static int[] Convert(String command, String lhv, String rhv){
         int[] opcode = {255};
@@ -24,6 +30,7 @@ public class InstructionConverter {
                 opcode = new int[1];
                 opcode[0] = totalOffset;
             }
+            //immediates
             else if ((gpRegsAndHLPointer.contains(lhv) && IsInteger(rhv))){
                 int lhvOffset = gpRegsAndHLPointer.indexOf(lhv);
                 int totalOffset = 0x90 + lhvOffset;
@@ -31,6 +38,7 @@ public class InstructionConverter {
                 opcode[0] = totalOffset;
                 opcode[1] = Integer.parseInt(rhv);
             }
+            //16 bit immediates
             else if ((comboRegs.contains(lhv)) && IsInteger(rhv)){
                 System.out.println("16 bit load found");
                 int lhvOffset = comboRegs.indexOf(lhv);
@@ -43,6 +51,7 @@ public class InstructionConverter {
                 opcode[1] = lowByte;
                 opcode[2] = highByte;
             }
+            //ld ptr, a
             else if(weirdPointers.contains(lhv) || weirdPointers.contains(rhv)){
                 int totalOffset = 0xa0;
                 if (weirdPointers.contains(rhv)){
@@ -55,19 +64,34 @@ public class InstructionConverter {
                 opcode[0] = totalOffset;
             }
         }
-        else if (command.equals("add")){
-            System.out.println("Add found");
-        }
-        else if (command.equals("dec")){
-            if (gpRegsAndHLPointer.contains(lhv)){
-                System.out.println("8bit dec found");
-                int totalOffset = 0x88 + gpRegsAndHLPointer.indexOf(lhv);
-                opcode = new int[1];
-                opcode[0] = totalOffset;
-            }
-        }
-        else if (command.equals("jp") && lhv != null){
+        //the five rows of easily parsable math instructions
+        else if (standardMath.contains(command)){
+            int instructionOffset = 0x40 + standardMath.indexOf(command) * 8;
+            instructionOffset += gpRegsAndHLPointer.indexOf(lhv);
 
+            opcode = new int[1];
+            opcode[0] = instructionOffset;
+            //todo immediates, 16 bits
+        }
+        else if (flowControl.contains(command)){
+            int offset = 0xC0;
+            offset += (flowControl.indexOf(command)+1) * 8;
+            //if there's multiple operands, then lhv is a flag, otherwise it's an address
+            String address = lhv;
+            if (rhv != null){
+                offset+=(flags.indexOf(lhv));
+                address = rhv;
+            }
+            opcode = new int[2];
+            opcode[0] = offset;
+            System.out.println("Searcing for address called " + address);
+            System.out.println(labelMap.keySet());
+            opcode[1] = labelMap.get(address);
+        }
+        else if (stragglers.contains(command)){
+            int offset = stragglers.indexOf(command) + 0xf0;
+            opcode = new int[1];
+            opcode[0] = offset;
         }
         else {
             System.out.println("Unknown operation " + command);
@@ -78,6 +102,7 @@ public class InstructionConverter {
             System.out.printf("0x%02X ", code);
         }
         System.out.println("");
+        index += opcode.length;
         return opcode;
     }
 
@@ -88,5 +113,11 @@ public class InstructionConverter {
             return false;
         }
         return true;
+    }
+
+    public static void AddLabel(String label){
+        label = label.replaceAll(":","");
+        System.out.println("Adding label " + label);
+        labelMap.put(label, index);
     }
 }

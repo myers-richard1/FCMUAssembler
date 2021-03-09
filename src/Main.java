@@ -72,9 +72,10 @@ public class Main {
         ArrayList<int[]> opcodes = new ArrayList<int[]>();
         for (String line : list){
             System.out.println("Parsing " + line);
-            String cleanedLine = line.trim().toLowerCase();
+            String cleanedLine = line.trim();
             if (cleanedLine.contains(":")){
                 System.out.println("Label found");
+                InstructionConverter.AddLabel(cleanedLine);
             }
             else {
                 String[] split = line.replace(",", "").split(" ");
