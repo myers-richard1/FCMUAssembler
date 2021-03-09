@@ -75,18 +75,22 @@ public class InstructionConverter {
         }
         else if (flowControl.contains(command)){
             int offset = 0xC0;
-            offset += (flowControl.indexOf(command)+1) * 8;
+            offset += (flowControl.indexOf(command)) * 8;
             //if there's multiple operands, then lhv is a flag, otherwise it's an address
             String address = lhv;
             if (rhv != null){
-                offset+=(flags.indexOf(lhv));
+                offset+=(flags.indexOf(lhv) + 1);
                 address = rhv;
             }
-            opcode = new int[2];
+            opcode = new int[3];
             opcode[0] = offset;
             System.out.println("Searcing for address called " + address);
             System.out.println(labelMap.keySet());
-            opcode[1] = labelMap.get(address);
+            int addressInt = labelMap.get(address);
+            int low = addressInt & 0xff;
+            int high = (addressInt >> 8) & 0xff;
+            opcode[1] = low;
+            opcode[2] = high;
         }
         else if (stragglers.contains(command)){
             int offset = stragglers.indexOf(command) + 0xf0;

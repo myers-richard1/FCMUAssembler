@@ -85,6 +85,7 @@ public class Main {
                 if (split.length > 1) lhv = split[1];
                 if (split.length > 2) rhv = split[2];
                 int[] opcode = InstructionConverter.Convert(command, lhv, rhv);
+                opcodes.add(opcode);
             }
         }
 
