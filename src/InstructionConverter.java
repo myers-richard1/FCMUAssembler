@@ -16,7 +16,7 @@ public class InstructionConverter {
     public static int index;
     public static HashMap<String, Integer> labelMap = new HashMap<String, Integer>();
 
-    public static int[] Convert(String command, String lhv, String rhv){
+    public static int[] Convert(String command, String lhv, String rhv, boolean labelpass){
         int[] opcode = {255};
         if (command.equals("ld")){
             System.out.println("Load found, lh rh: " + lhv + ", " + rhv);
@@ -86,7 +86,8 @@ public class InstructionConverter {
             opcode[0] = offset;
             System.out.println("Searcing for address called " + address);
             System.out.println(labelMap.keySet());
-            int addressInt = labelMap.get(address);
+            int addressInt = 0;
+            if (!labelpass) addressInt = labelMap.get(address);
             int low = addressInt & 0xff;
             int high = (addressInt >> 8) & 0xff;
             opcode[1] = low;
@@ -107,6 +108,7 @@ public class InstructionConverter {
         }
         System.out.println("");
         index += opcode.length;
+        System.out.println("Index is now " + index);
         return opcode;
     }
 
@@ -121,7 +123,19 @@ public class InstructionConverter {
 
     public static void AddLabel(String label){
         label = label.replaceAll(":","");
-        System.out.println("Adding label " + label);
+        System.out.println("Adding label " + label + " at index " + (index));
         labelMap.put(label, index);
+    }
+
+    public static int[] ExecuteDefinition(String command){
+        command = command.replace("DB", "").trim();
+        String[] literals = command.split(",");
+        int[] bytes = new int[literals.length];
+        for (int i = 0; i < literals.length; i++) {
+            String literal = literals[i].replace("$", "").trim();
+            bytes[i] = Integer.parseInt(literal, 16);
+        }
+        index += bytes.length;
+        return bytes;
     }
 }
