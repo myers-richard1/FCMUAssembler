@@ -36,6 +36,7 @@ public class Main {
         try {
             OutputStream outputStream = new FileOutputStream("output.bin");
             for (int[] opcode : opcodes) {
+                System.out.println("Writing " + opcode.length + " bytes");
                 for (int code : opcode){
                     outputStream.write(code);
                 }
@@ -49,6 +50,7 @@ public class Main {
         for (String line : linesOfFile){
             System.out.println("Parsing " + line);
             String cleanedLine = line.trim();
+            if (cleanedLine.startsWith(";")) continue;
             if (cleanedLine.equals("")) continue;
             if (cleanedLine.contains(":")){
                 if (!labelpass) continue;
@@ -57,6 +59,7 @@ public class Main {
             }
             else if (cleanedLine.contains("DB")){
                 int[] opcode = InstructionConverter.ExecuteDefinition(cleanedLine);
+                System.out.println("Definition is " + opcode.length + " bytes long, addingn to opcodes array");
                 opcodes.add(opcode);
             }
             else {

@@ -10,6 +10,7 @@ public class InstructionConverter {
     public static ArrayList<String> gpRegsAndHLPointer =
             new ArrayList<String>(Arrays.asList("a", "b", "c", "d", "e", "h", "l", "[hl]"));
     public static ArrayList<String> comboRegs = new ArrayList<String>(Arrays.asList("bc", "de", "hl"));
+    public static ArrayList<String> comboRegsMath = new ArrayList<String>(Arrays.asList("bc", "de", "hl", "sp"));
     public static ArrayList<String> weirdPointers = new ArrayList<String>(Arrays.asList("[bc]","[de]","[hli]","[hld]"));
     public static ArrayList<String> flags = new ArrayList<String>(Arrays.asList("z","c","nz","nc"));
 
@@ -66,12 +67,22 @@ public class InstructionConverter {
         }
         //the five rows of easily parsable math instructions
         else if (standardMath.contains(command)){
-            int instructionOffset = 0x40 + standardMath.indexOf(command) * 8;
-            instructionOffset += gpRegsAndHLPointer.indexOf(lhv);
+            int instructionOffset = 0;
+            if (gpRegsAndHLPointer.contains(lhv)) {
+                instructionOffset = 0x40 + standardMath.indexOf(command) * 8;
+                instructionOffset += gpRegsAndHLPointer.indexOf(lhv);
+            }
+            else if (comboRegsMath.contains(lhv) && (command.equals("dec") || command.equals("inc"))){
+                instructionOffset = 0xE0;
+                instructionOffset = command.equals("inc") ? 0xe0 : 0xe4;
+                instructionOffset += comboRegsMath.indexOf(lhv);
+            }
+            else{
+                System.out.println("This is math that idk");
+            }
 
             opcode = new int[1];
             opcode[0] = instructionOffset;
-            //todo immediates, 16 bits
         }
         else if (flowControl.contains(command)){
             int offset = 0xC0;
@@ -136,6 +147,7 @@ public class InstructionConverter {
             bytes[i] = Integer.parseInt(literal, 16);
         }
         index += bytes.length;
+        System.out.println("Definition is " + bytes.length + " bytes");
         return bytes;
     }
 }
