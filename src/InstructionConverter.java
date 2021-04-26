@@ -14,7 +14,7 @@ public class InstructionConverter {
     public static ArrayList<String> weirdPointers = new ArrayList<String>(Arrays.asList("[bc]","[de]","[hli]","[hld]"));
     public static ArrayList<String> flags = new ArrayList<String>(Arrays.asList("z","c","nz","nc"));
 
-    public static int index;
+    private static int index;
     public static HashMap<String, Integer> labelMap = new HashMap<String, Integer>();
 
     public static int[] Convert(String command, String lhv, String rhv, boolean labelpass){
@@ -40,13 +40,19 @@ public class InstructionConverter {
                 opcode[1] = Integer.parseInt(rhv);
             }
             //16 bit immediates
-            else if ((comboRegs.contains(lhv)) && IsInteger(rhv)){
+            else if ((comboRegs.contains(lhv)) && (IsInteger(rhv) || labelMap.containsKey(rhv) || labelpass)){
                 System.out.println("16 bit load found");
                 int lhvOffset = comboRegs.indexOf(lhv);
                 int totalOffset = 0xEC + lhvOffset;
                 opcode = new int[3];
                 opcode[0] = totalOffset;
-                int value = Integer.parseInt(rhv);
+                int value = 0;
+                if (IsInteger(rhv)) {
+                    value = Integer.parseInt(rhv);
+                }
+                else if (labelMap.containsKey(rhv)){
+                    value = labelMap.get(rhv);
+                }
                 int lowByte = value & 0xff;
                 int highByte = (value >> 8) & 0xff;
                 opcode[1] = lowByte;
@@ -95,7 +101,7 @@ public class InstructionConverter {
             }
             opcode = new int[3];
             opcode[0] = offset;
-            System.out.println("Searcing for address called " + address);
+            System.out.println("Searching for address called " + address);
             System.out.println(labelMap.keySet());
             int addressInt = 0;
             if (!labelpass) addressInt = labelMap.get(address);
@@ -146,6 +152,7 @@ public class InstructionConverter {
             String literal = literals[i].replace("$", "").trim();
             bytes[i] = Integer.parseInt(literal, 16);
         }
+        System.out.println("Defining bytes at " + index);
         index += bytes.length;
         System.out.println("Definition is " + bytes.length + " bytes");
         return bytes;

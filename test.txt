@@ -13,6 +13,8 @@ ld b, 32
 dec c
 jp nz, clearMap
 
+
+
 ;clear pixel data
 ld a, 0
 ld hl, 42240
@@ -22,10 +24,13 @@ ld [hli], a
 dec bc
 jp nz, clearTiles
 
+
+
 ;load font
 ld hl, pixelData
 ld bc, 42240
 ld de, 2032
+
 loadFont:
 ld a, [hli]
 ld [bc], a
