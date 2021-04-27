@@ -59,7 +59,7 @@ public class Main {
             }
             else if (cleanedLine.contains("DB")){
                 int[] opcode = InstructionConverter.ExecuteDefinition(cleanedLine);
-                System.out.println("Definition is " + opcode.length + " bytes long, addingn to opcodes array");
+                System.out.println("Definition is " + opcode.length + " bytes long, adding to opcodes array");
                 opcodes.add(opcode);
             }
             else {

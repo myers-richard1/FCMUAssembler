@@ -147,10 +147,34 @@ public class InstructionConverter {
     public static int[] ExecuteDefinition(String command){
         command = command.replace("DB", "").trim();
         String[] literals = command.split(",");
-        int[] bytes = new int[literals.length];
-        for (int i = 0; i < literals.length; i++) {
-            String literal = literals[i].replace("$", "").trim();
-            bytes[i] = Integer.parseInt(literal, 16);
+        int numberOfBytes = literals.length;
+        //check if there's any strings
+        for (String literal : literals){
+            //if it's a string
+            if (literal.contains("\""))
+                //find out how many chars it is
+                numberOfBytes+= literal.replaceAll("\"","").length();
+        }
+        int[] bytes = new int[numberOfBytes];
+        int byteArrayIndex = 0;
+        for (String literal : literals) {
+            //check if string
+            if (literal.contains("\"")){
+                System.out.println("The literal is a string");
+                for (char c : literal.replaceAll("\"", "").trim().toCharArray()){
+                    System.out.println("Character: " + c);
+                    bytes[byteArrayIndex++] = (int)c;
+                }
+            }
+            //check if hex
+            else if (literal.contains("$")){
+                String parsed = literal.replace("$", "").trim();
+                bytes[byteArrayIndex++] = Integer.parseInt(parsed, 16);
+
+            }
+            else{
+                System.out.println("The literal " + literal + " did not match any known definition type");
+            }
         }
         System.out.println("Defining bytes at " + index);
         index += bytes.length;
