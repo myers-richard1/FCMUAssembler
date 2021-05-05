@@ -2,7 +2,7 @@ This is a test of the multifile splitter
 ~
 ;load 0s into the tilemap
 ld a, 0
-ld hl, 46592
+ld hl, 49664
 ld b, 32
 ld c, 32
 clearMap:
@@ -15,7 +15,7 @@ jp nz, clearMap
 
 ;load text
 ld hl, initVRAMText
-ld bc, 46592
+ld bc, 49664
 loadText:
 ;get the char
 ld a, [hli]
@@ -28,7 +28,7 @@ jp loadText
 loadTextDone:
 ;clear pixel data
 ld a, 0
-ld hl, 42240
+ld hl, 45312
 ld bc, 4096
 clearTiles:
 ld [hli], a
@@ -37,7 +37,7 @@ jp nz, clearTiles
 
 ;load font
 ld hl, pixelData
-ld bc, 42240
+ld bc, 45312
 ld de, 2032
 
 loadFont:
@@ -49,7 +49,7 @@ jp nz, loadFont
 
 ;set the default palette for each tile
 ld a, 0
-ld hl, 46336
+ld hl, 49408
 ld b, 255
 setPaletteIndex:
 ld [hli], a
@@ -70,7 +70,7 @@ jp nz, loadPalette
 ;inform
 ;load text
 ld hl, VRAMDoneText
-ld bc, 46656
+ld bc, 49728
 loadText2:
 ;get the char
 ld a, [hli]
@@ -83,7 +83,7 @@ loadTextDone2:
 
 ;load text
 ld hl, BeginningRAMText
-ld bc, 46720
+ld bc, 49792
 loadText3:
 ;get the char
 ld a, [hli]
@@ -94,6 +94,7 @@ inc bc
 jp loadText3
 loadTextDone3:
 
+;clear ram
 ld hl, 55040
 ld a, 0
 ld bc, 8192
@@ -104,7 +105,7 @@ jp nz, clearRAM
 
 ;load text
 ld hl, EndRAMText
-ld bc, 46784
+ld bc, 49856
 loadText4:
 ;get the char
 ld a, [hli]
